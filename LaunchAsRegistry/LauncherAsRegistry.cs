@@ -10,7 +10,7 @@ namespace LaunchAsRegistry {
         public LauncherAsRegistry() {
             process1 = new Process();
             process2 = new Process();
-            process2.StartInfo.FileName = Constants.RegeditExe;
+            process2.StartInfo.FileName = Constants.RegeditExeFileName;
         }
 
         public void Launch() {

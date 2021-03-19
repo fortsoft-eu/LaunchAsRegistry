@@ -91,7 +91,7 @@ namespace LaunchAsRegistry {
                         workingFolderPathTemp = textBox3.Text;
                     }
                     if (string.IsNullOrWhiteSpace(textBox5.Text) || textBox5.Text == shortcutNameTemp) {
-                        textBox5.Text = Application.ProductName + " " + Path.GetFileNameWithoutExtension(filePath);
+                        textBox5.Text = Application.ProductName + Constants.Space + Path.GetFileNameWithoutExtension(filePath);
                         textBox5.SelectAll();
                         shortcutNameTemp = textBox5.Text;
                     }
@@ -102,7 +102,7 @@ namespace LaunchAsRegistry {
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
-                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
+                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
                 dialog.ShowDialog();
             }
         }
@@ -157,7 +157,7 @@ namespace LaunchAsRegistry {
                         workingFolderPathTemp = textBox3.Text;
                     }
                     if (string.IsNullOrWhiteSpace(textBox5.Text) || textBox5.Text == shortcutNameTemp) {
-                        textBox5.Text = Application.ProductName + " " + Path.GetFileNameWithoutExtension(textBox1.Text);
+                        textBox5.Text = Application.ProductName + Constants.Space + Path.GetFileNameWithoutExtension(textBox1.Text);
                         textBox5.SelectAll();
                         shortcutNameTemp = textBox5.Text;
                     }
@@ -165,7 +165,7 @@ namespace LaunchAsRegistry {
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
-                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
+                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
                 dialog.ShowDialog();
             } finally {
                 textBox1.Focus();
@@ -194,7 +194,7 @@ namespace LaunchAsRegistry {
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
-                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
+                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
                 dialog.ShowDialog();
             } finally {
                 textBox3.Focus();
@@ -224,7 +224,7 @@ namespace LaunchAsRegistry {
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
-                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
+                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
                 dialog.ShowDialog();
             } finally {
                 textBox4.Focus();
@@ -249,13 +249,13 @@ namespace LaunchAsRegistry {
             }
             try {
                 Process process = new Process();
-                process.StartInfo.FileName = Constants.NotepadExe;
+                process.StartInfo.FileName = Constants.NotepadExeFileName;
                 process.StartInfo.Arguments = ArgumentParser.EscapeArgument(textBox4.Text);
                 process.Start();
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
-                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
+                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
                 dialog.ShowDialog();
             }
         }
@@ -265,7 +265,7 @@ namespace LaunchAsRegistry {
                 List<string> arguments = BuildArguments();
                 Process process = new Process();
                 process.StartInfo.FileName = Application.ExecutablePath;
-                process.StartInfo.Arguments = string.Join(" ", arguments);
+                process.StartInfo.Arguments = string.Join(Constants.Space, arguments);
                 process.StartInfo.WorkingDirectory = Application.StartupPath;
                 process.Start();
                 SaveSettings();
@@ -277,7 +277,7 @@ namespace LaunchAsRegistry {
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
-                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
+                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
                 dialog.ShowDialog();
             }
         }
@@ -344,7 +344,7 @@ namespace LaunchAsRegistry {
                     ShortcutFilePath = shortcutFilePath,
                     TargetPath = Application.ExecutablePath,
                     WorkingFolder = Application.StartupPath,
-                    Arguments = string.Join(" ", arguments),
+                    Arguments = string.Join(Constants.Space, arguments),
                     IconLocation = textBox1.Text
                 };
                 programShortcut.Create();
@@ -356,7 +356,7 @@ namespace LaunchAsRegistry {
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
-                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
+                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
                 dialog.ShowDialog();
             }
         }
@@ -374,12 +374,12 @@ namespace LaunchAsRegistry {
         private void OpenRegedit(object sender, EventArgs e) {
             try {
                 Process process = new Process();
-                process.StartInfo.FileName = Constants.RegeditExe;
+                process.StartInfo.FileName = Constants.RegeditExeFileName;
                 process.Start();
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
-                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
+                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
                 dialog.ShowDialog();
             }
         }
@@ -390,7 +390,7 @@ namespace LaunchAsRegistry {
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
-                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
+                dialog = new MessageForm(this, exception.Message, Program.GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageForm.Buttons.OK, MessageForm.BoxIcon.Error);
                 dialog.ShowDialog();
             }
         }

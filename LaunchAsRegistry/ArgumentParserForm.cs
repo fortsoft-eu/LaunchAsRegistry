@@ -22,7 +22,7 @@ namespace LaunchAsRegistry {
             argumentParser = new ArgumentParser();
 
             InitializeComponent();
-            Text = Program.GetTitle() + Constants.NDashWithSpaces + Text;
+            Text = Program.GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Text;
 
             statusBarPanel = new StatusBarPanel() {
                 BorderStyle = StatusBarPanelBorderStyle.Sunken,

@@ -12,7 +12,7 @@ namespace LaunchAsRegistry {
         [STAThread]
         public static void Main(string[] args) {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT) {
-                MessageBox.Show(Properties.Resources.MessageApplicationCannotRun, GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(Properties.Resources.MessageApplicationCannotRun, GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             Settings settings = new Settings();
@@ -27,7 +27,7 @@ namespace LaunchAsRegistry {
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
-                MessageBox.Show(exception.Message, GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(exception.Message, GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             if (argumentParser.HasArguments) {
@@ -44,14 +44,14 @@ namespace LaunchAsRegistry {
                     stringBuilder.AppendLine(Properties.Resources.HelpLine9.Replace("\\t", "\t")).AppendLine();
                     stringBuilder.AppendLine(Properties.Resources.HelpLine10.Replace("\\t", "\t")).AppendLine();
                     stringBuilder.AppendLine(Properties.Resources.HelpLine11.Replace("\\t", "\t"));
-                    MessageBox.Show(stringBuilder.ToString(), GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionHelp, MessageBoxButtons.OK, MessageBoxIcon.Question);
+                    MessageBox.Show(stringBuilder.ToString(), GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionHelp, MessageBoxButtons.OK, MessageBoxIcon.Question);
                 } else if (argumentParser.IsThisTest) {
                     try {
                         Application.Run(new ArgumentParserForm());
                     } catch (Exception exception) {
                         Debug.WriteLine(exception);
                         ErrorLog.WriteLine(exception);
-                        MessageBox.Show(exception.Message, GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(exception.Message, GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         MessageBox.Show(Properties.Resources.MessageApplicationError, GetTitle(), MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 } else {
@@ -67,7 +67,7 @@ namespace LaunchAsRegistry {
                     } catch (Exception exception) {
                         Debug.WriteLine(exception);
                         ErrorLog.WriteLine(exception);
-                        MessageBox.Show(exception.Message, GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(exception.Message, GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             } else {
@@ -76,7 +76,7 @@ namespace LaunchAsRegistry {
                 } catch (Exception exception) {
                     Debug.WriteLine(exception);
                     ErrorLog.WriteLine(exception);
-                    MessageBox.Show(exception.Message, GetTitle() + Constants.NDashWithSpaces + Properties.Resources.CaptionError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(exception.Message, GetTitle() + Constants.Space + Constants.EnDash + Constants.Space + Properties.Resources.CaptionError, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     MessageBox.Show(Properties.Resources.MessageApplicationError, GetTitle(), MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }

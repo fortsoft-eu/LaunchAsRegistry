@@ -183,7 +183,7 @@ namespace LaunchAsRegistry {
         public string ArgumentString {
             get {
                 if (string.IsNullOrEmpty(argumentString) && arguments.Count > 0) {
-                    return string.Join(" ", arguments);
+                    return string.Join(Constants.Space, arguments);
                 }
                 return argumentString;
             }
