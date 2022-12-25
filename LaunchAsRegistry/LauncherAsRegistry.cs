@@ -3,8 +3,6 @@ using System.Threading;
 
 namespace LaunchAsRegistry {
     public class LauncherAsRegistry {
-        private string applicationFilePath, arguments, workingFolderPath, regFilePath;
-        private bool oneInstance;
         private Process process1, process2;
 
         public LauncherAsRegistry() {
@@ -14,15 +12,15 @@ namespace LaunchAsRegistry {
         }
 
         public void Launch() {
-            if (oneInstance) {
-                if (FocusApplication.SwitchToRunningInstance(applicationFilePath)) {
+            if (OneInstance) {
+                if (SingleInstance.FocusRunning(ApplicationFilePath)) {
                     return;
                 }
             }
-            process1.StartInfo.FileName = applicationFilePath;
-            process1.StartInfo.Arguments = arguments;
-            process1.StartInfo.WorkingDirectory = workingFolderPath;
-            process2.StartInfo.Arguments = "/s " + ArgumentParser.EscapeArgument(regFilePath);
+            process1.StartInfo.FileName = ApplicationFilePath;
+            process1.StartInfo.Arguments = Arguments;
+            process1.StartInfo.WorkingDirectory = WorkingFolderPath;
+            process2.StartInfo.Arguments = "/s" + Constants.Space + ArgumentParser.EscapeArgument(RegFilePath);
             process2.Start();
             do {
                 Thread.Sleep(100);
@@ -30,49 +28,14 @@ namespace LaunchAsRegistry {
             process1.Start();
         }
 
-        public string ApplicationFilePath {
-            get {
-                return applicationFilePath;
-            }
-            set {
-                applicationFilePath = value;
-            }
-        }
+        public bool OneInstance { get; set; }
 
-        public string Arguments {
-            get {
-                return arguments;
-            }
-            set {
-                arguments = value;
-            }
-        }
+        public string ApplicationFilePath { get; set; }
 
-        public string WorkingFolderPath {
-            get {
-                return workingFolderPath;
-            }
-            set {
-                workingFolderPath = value;
-            }
-        }
+        public string Arguments { get; set; }
 
-        public bool OneInstance {
-            get {
-                return oneInstance;
-            }
-            set {
-                oneInstance = value;
-            }
-        }
+        public string RegFilePath { get; set; }
 
-        public string RegFilePath {
-            get {
-                return regFilePath;
-            }
-            set {
-                regFilePath = value;
-            }
-        }
+        public string WorkingFolderPath { get; set; }
     }
 }

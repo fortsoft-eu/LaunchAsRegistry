@@ -72,7 +72,7 @@ namespace LaunchAsRegistry {
                 }
             } else {
                 try {
-                    SingleMainForm.Run(new MainForm(settings));
+                    SingleInstance.Run(new MainForm(settings), Application.ProductName);
                 } catch (Exception exception) {
                     Debug.WriteLine(exception);
                     ErrorLog.WriteLine(exception);

@@ -5,32 +5,67 @@ using System.Text.RegularExpressions;
 
 namespace LaunchAsRegistry {
     public class ArgumentParser {
+        private bool expectingFilePath, expectingArguments, expectingFolderPath, expectingRegFilePath, filePathSet;
+        private bool argumentsSet, folderPathSet, regFilePathSet, helpSet, hasArguments, oneInstanceSet, thisTestSet;
         private List<string> arguments;
         private string argumentString, applicationFilePath, applicationArguments, workingFolderPath, regFilePath;
-        private bool expectingFilePath, expectingArguments, expectingFolderPath, expectingRegFilePath, filePathSet, argumentsSet, folderPathSet, regFilePathSet, helpSet, hasArguments, oneInstanceSet, thisTestSet;
 
         public ArgumentParser() {
             Reset();
         }
 
-        private void Reset() {
-            applicationFilePath = string.Empty;
-            applicationArguments = string.Empty;
-            workingFolderPath = string.Empty;
-            regFilePath = string.Empty;
-            expectingFilePath = false;
-            expectingArguments = false;
-            expectingFolderPath = false;
-            expectingRegFilePath = false;
-            filePathSet = false;
-            argumentsSet = false;
-            folderPathSet = false;
-            regFilePathSet = false;
-            helpSet = false;
-            hasArguments = false;
-            oneInstanceSet = false;
-            thisTestSet = false;
+        public bool HasArguments => hasArguments;
+
+        public bool IsHelp => helpSet;
+
+        public bool IsThisTest => thisTestSet;
+
+        public bool OneInstance => oneInstanceSet;
+
+        public string ApplicationArguments => applicationArguments;
+
+        public string ApplicationFilePath => applicationFilePath;
+
+        public string[] Arguments {
+            get {
+                return arguments.ToArray();
+            }
+            set {
+                Reset();
+                arguments = new List<string>(value.Length);
+                arguments.AddRange(value);
+                try {
+                    Evaluate();
+                } catch (Exception exception) {
+                    Reset();
+                    throw exception;
+                }
+            }
         }
+
+        public string ArgumentString {
+            get {
+                if (string.IsNullOrEmpty(argumentString) && arguments.Count > 0) {
+                    return string.Join(Constants.Space.ToString(), arguments);
+                }
+                return argumentString;
+            }
+            set {
+                Reset();
+                argumentString = value;
+                arguments = Parse(argumentString);
+                try {
+                    Evaluate();
+                } catch (Exception exception) {
+                    Reset();
+                    throw exception;
+                }
+            }
+        }
+
+        public string RegFilePath => regFilePath;
+
+        public string WorkingFolderPath => workingFolderPath;
 
         private void Evaluate() {
             foreach (string arg in arguments) {
@@ -99,7 +134,7 @@ namespace LaunchAsRegistry {
                     regFilePath = argument;
                     expectingRegFilePath = false;
                     regFilePathSet = true;
-                } else if (argument.StartsWith("-") || argument.StartsWith("/")) {
+                } else if (argument.StartsWith(Constants.Hyphen.ToString()) || argument.StartsWith(Constants.Slash.ToString())) {
                     throw new ApplicationException(Properties.Resources.ExceptionMessageU);
                 } else {
                     throw new ApplicationException(Properties.Resources.ExceptionMessageM);
@@ -110,106 +145,40 @@ namespace LaunchAsRegistry {
             }
         }
 
+        private void Reset() {
+            applicationFilePath = string.Empty;
+            applicationArguments = string.Empty;
+            workingFolderPath = string.Empty;
+            regFilePath = string.Empty;
+            expectingFilePath = false;
+            expectingArguments = false;
+            expectingFolderPath = false;
+            expectingRegFilePath = false;
+            filePathSet = false;
+            argumentsSet = false;
+            folderPathSet = false;
+            regFilePathSet = false;
+            helpSet = false;
+            hasArguments = false;
+            oneInstanceSet = false;
+            thisTestSet = false;
+        }
+
         public static string EscapeArgument(string argument) {
             argument = Regex.Replace(argument, @"(\\*)" + "\"", @"$1$1\" + "\"");
             return "\"" + Regex.Replace(argument, @"(\\+)$", @"$1$1") + "\"";
         }
 
-        public bool HasArguments {
-            get {
-                return hasArguments;
-            }
-        }
-
-        public bool OneInstance {
-            get {
-                return oneInstanceSet;
-            }
-        }
-
-        public bool IsHelp {
-            get {
-                return helpSet;
-            }
-        }
-
-        public bool IsThisTest {
-            get {
-                return thisTestSet;
-            }
-        }
-
-        public string ApplicationFilePath {
-            get {
-                return applicationFilePath;
-            }
-        }
-
-        public string WorkingFolderPath {
-            get {
-                return workingFolderPath;
-            }
-        }
-
-        public string ApplicationArguments {
-            get {
-                return applicationArguments;
-            }
-        }
-
-        public string RegFilePath {
-            get {
-                return regFilePath;
-            }
-        }
-
-        public string[] Arguments {
-            get {
-                return arguments.ToArray();
-            }
-            set {
-                Reset();
-                arguments = new List<string>(value.Length);
-                arguments.AddRange(value);
-                try {
-                    Evaluate();
-                } catch (Exception exception) {
-                    Reset();
-                    throw exception;
-                }
-            }
-        }
-
-        public string ArgumentString {
-            get {
-                if (string.IsNullOrEmpty(argumentString) && arguments.Count > 0) {
-                    return string.Join(Constants.Space, arguments);
-                }
-                return argumentString;
-            }
-            set {
-                Reset();
-                argumentString = value;
-                arguments = Parse(argumentString);
-                try {
-                    Evaluate();
-                } catch (Exception exception) {
-                    Reset();
-                    throw exception;
-                }
-            }
-        }
-
         private static List<string> Parse(string str) {
             List<string> arguments = new List<string>();
-            StringBuilder c = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder();
             bool e = false, d = false, s = false;
             for (int i = 0; i < str.Length; i++) {
                 if (!s) {
-                    if (str[i] == ' ') {
+                    if (str[i] == Constants.Space) {
                         continue;
                     }
-                    d = str[i] == '"';
+                    d = str[i] == Constants.QuotationMark;
                     s = true;
                     e = false;
                     if (d) {
@@ -217,34 +186,34 @@ namespace LaunchAsRegistry {
                     }
                 }
                 if (d) {
-                    if (str[i] == '\\') {
-                        if (i + 1 < str.Length && str[i + 1] == '"') {
-                            c.Append(str[++i]);
+                    if (str[i] == Constants.BackSlash) {
+                        if (i + 1 < str.Length && str[i + 1] == Constants.QuotationMark) {
+                            stringBuilder.Append(str[++i]);
                         } else {
-                            c.Append(str[i]);
+                            stringBuilder.Append(str[i]);
                         }
-                    } else if (str[i] == '"') {
-                        if (i + 1 < str.Length && str[i + 1] == '"') {
-                            c.Append(str[++i]);
+                    } else if (str[i] == Constants.QuotationMark) {
+                        if (i + 1 < str.Length && str[i + 1] == Constants.QuotationMark) {
+                            stringBuilder.Append(str[++i]);
                         } else {
                             d = false;
                             e = true;
                         }
                     } else {
-                        c.Append(str[i]);
+                        stringBuilder.Append(str[i]);
                     }
                 } else if (s) {
-                    if (str[i] == ' ') {
+                    if (str[i] == Constants.Space) {
                         s = false;
-                        arguments.Add(e ? c.ToString() : c.ToString().TrimEnd(' '));
-                        c = new StringBuilder();
+                        arguments.Add(e ? stringBuilder.ToString() : stringBuilder.ToString().TrimEnd(Constants.Space));
+                        stringBuilder = new StringBuilder();
                     } else if (!e) {
-                        c.Append(str[i]);
+                        stringBuilder.Append(str[i]);
                     }
                 }
             }
-            if (c.Length > 0) {
-                arguments.Add(c.ToString());
+            if (stringBuilder.Length > 0) {
+                arguments.Add(stringBuilder.ToString());
             }
             return arguments;
         }

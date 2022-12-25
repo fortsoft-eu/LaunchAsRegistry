@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FostSoft.Tools;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -8,20 +9,31 @@ using System.Windows.Forms;
 
 namespace LaunchAsRegistry {
     public partial class MainForm : Form {
+        private const int MOUSEEVENTF_LEFTDOWN = 0x02;
+        private const int MOUSEEVENTF_LEFTUP = 0x04;
+        private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
+        private const int MOUSEEVENTF_RIGHTUP = 0x10;
+
+        [DllImport("user32.dll", EntryPoint = "mouse_event", SetLastError = true)]
+        private static extern void MouseEvent(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
+
+        private Form dialog;
         private int textBoxClicks;
-        private Timer textBoxClicksTimer;
         private Point location;
         private Settings settings;
         private string workingFolderPathTemp, shortcutNameTemp;
-        private Form dialog;
+        private Timer textBoxClicksTimer;
 
         public MainForm(Settings settings) {
             Text = Application.ProductName;
             Icon = Properties.Resources.Icon;
-            dialog = null;
 
-            textBoxClicks = 0;
             textBoxClicksTimer = new Timer();
+            textBoxClicksTimer.Interval = SystemInformation.DoubleClickTime;
+            textBoxClicksTimer.Tick += new EventHandler((sender, e) => {
+                textBoxClicksTimer.Stop();
+                textBoxClicks = 0;
+            });
 
             InitializeComponent();
 
@@ -50,30 +62,23 @@ namespace LaunchAsRegistry {
             }
             location = e.Location;
             if (textBoxClicks == 3) {
+                textBoxClicks = 0;
+                MouseEvent(MOUSEEVENTF_LEFTUP, Convert.ToUInt32(Cursor.Position.X), Convert.ToUInt32(Cursor.Position.Y), 0, 0);
                 if (textBox.Multiline) {
-                    int selectionEnd = Math.Min(textBox.Text.IndexOf('\r', textBox.SelectionStart), textBox.Text.IndexOf('\n', textBox.SelectionStart));
+                    int selectionEnd = Math.Min(textBox.Text.IndexOf(Constants.CarriageReturn, textBox.SelectionStart), textBox.Text.IndexOf(Constants.LineFeed, textBox.SelectionStart));
                     if (selectionEnd < 0) {
                         selectionEnd = textBox.TextLength;
                     }
                     selectionEnd = Math.Max(textBox.SelectionStart + textBox.SelectionLength, selectionEnd);
                     int selectionStart = Math.Min(textBox.SelectionStart, selectionEnd);
-                    do {
-                        selectionStart--;
-                    } while (selectionStart > 0 && textBox.Text[selectionStart] != '\n' && textBox.Text[selectionStart] != '\r');
+                    while (--selectionStart > 0 && textBox.Text[selectionStart] != Constants.LineFeed && textBox.Text[selectionStart] != Constants.CarriageReturn) { }
                     textBox.Select(selectionStart, selectionEnd - selectionStart);
                 } else {
                     textBox.SelectAll();
                 }
-                textBoxClicks = 0;
-                MouseEvent(MOUSEEVENTF_LEFTUP, Convert.ToUInt32(Cursor.Position.X), Convert.ToUInt32(Cursor.Position.X), 0, 0);
                 textBox.Focus();
             } else {
-                textBoxClicksTimer.Interval = SystemInformation.DoubleClickTime;
                 textBoxClicksTimer.Start();
-                textBoxClicksTimer.Tick += new EventHandler((s, t) => {
-                    textBoxClicksTimer.Stop();
-                    textBoxClicks = 0;
-                });
             }
         }
 
@@ -107,17 +112,9 @@ namespace LaunchAsRegistry {
             }
         }
 
-        private void MainFormDragEnter(object sender, DragEventArgs e) {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop, false)) {
-                e.Effect = DragDropEffects.All;
-            } else {
-                e.Effect = DragDropEffects.None;
-            }
-        }
+        private void MainFormDragEnter(object sender, DragEventArgs e) => e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop, false) ? DragDropEffects.All : DragDropEffects.None;
 
-        private void Close(object sender, EventArgs e) {
-            Close();
-        }
+        private void Close(object sender, EventArgs e) => Close();
 
         private void ShowAbout(object sender, EventArgs e) {
             dialog = new AboutForm();
@@ -265,7 +262,7 @@ namespace LaunchAsRegistry {
                 List<string> arguments = BuildArguments();
                 Process process = new Process();
                 process.StartInfo.FileName = Application.ExecutablePath;
-                process.StartInfo.Arguments = string.Join(Constants.Space, arguments);
+                process.StartInfo.Arguments = string.Join(Constants.Space.ToString(), arguments);
                 process.StartInfo.WorkingDirectory = Application.StartupPath;
                 process.Start();
                 SaveSettings();
@@ -343,8 +340,8 @@ namespace LaunchAsRegistry {
                 ProgramShortcut programShortcut = new ProgramShortcut() {
                     ShortcutFilePath = shortcutFilePath,
                     TargetPath = Application.ExecutablePath,
-                    WorkingFolder = Application.StartupPath,
-                    Arguments = string.Join(Constants.Space, arguments),
+                    WorkingDirectory = Application.StartupPath,
+                    Arguments = string.Join(Constants.Space.ToString(), arguments),
                     IconLocation = textBox1.Text
                 };
                 programShortcut.Create();
@@ -361,9 +358,7 @@ namespace LaunchAsRegistry {
             }
         }
 
-        private void MainFormClosing(object sender, FormClosingEventArgs e) {
-            SaveSettings();
-        }
+        private void MainFormClosing(object sender, FormClosingEventArgs e) => SaveSettings();
 
         private void MainFormActivated(object sender, EventArgs e) {
             if (dialog != null) {
@@ -386,7 +381,7 @@ namespace LaunchAsRegistry {
 
         private void OpenHelp(object sender, HelpEventArgs hlpevent) {
             try {
-                Process.Start(Properties.Resources.Website.TrimEnd('/').ToLowerInvariant() + '/' + Application.ProductName.ToLowerInvariant() + '/');
+                Process.Start(Properties.Resources.Website.TrimEnd(Constants.Slash).ToLowerInvariant() + Constants.Slash + Application.ProductName.ToLowerInvariant() + Constants.Slash);
             } catch (Exception exception) {
                 Debug.WriteLine(exception);
                 ErrorLog.WriteLine(exception);
@@ -404,13 +399,5 @@ namespace LaunchAsRegistry {
             settings.OneInstance = checkBox.Checked;
             settings.Save();
         }
-
-        [DllImport("user32.dll", EntryPoint = "mouse_event", SetLastError = true)]
-        private static extern void MouseEvent(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
-
-        private const int MOUSEEVENTF_LEFTDOWN = 0x02;
-        private const int MOUSEEVENTF_LEFTUP = 0x04;
-        private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
-        private const int MOUSEEVENTF_RIGHTUP = 0x10;
     }
 }
