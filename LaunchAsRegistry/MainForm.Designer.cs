@@ -188,8 +188,8 @@
             // 
             // MainForm
             // 
-            this.AllowDrop = true;
             resources.ApplyResources(this, "$this");
+            this.AllowDrop = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button6;
             this.Controls.Add(this.checkBox);
