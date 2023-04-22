@@ -61,7 +61,11 @@
     </Compile>
     <Compile Include="Constants.cs" />
     <Compile Include="ErrorLog.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LauncherAsRegistry.cs" />
+    <Compile Include="LinkLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,6 +78,7 @@
     <Compile Include="MessageForm.Designer.cs">
       <DependentUpon>MessageForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="PersistentSettings.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -82,20 +87,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SingleInstance.cs" />
-    <EmbeddedResource Include="AboutForm.resx">
-      <DependentUpon>AboutForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ArgumentParserForm.resx">
-      <DependentUpon>ArgumentParserForm.cs</DependentUpon>
-    </EmbeddedResource>
+    <Compile Include="StaticMethods.cs" />
     <EmbeddedResource Include="MainForm.cs.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MessageForm.resx">
-      <DependentUpon>MessageForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

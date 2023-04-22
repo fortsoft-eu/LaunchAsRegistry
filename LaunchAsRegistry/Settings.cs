@@ -1,7 +1,7 @@
 ﻿/**
- * This library is open source software licensed under terms of the MIT License.
+ * This is open-source software licensed under the terms of the MIT License.
  *
- * Copyright (c) 2009-2022 Petr Červinka - FortSoft <cervinka@fortsoft.eu>
+ * Copyright (c) 2020-2023 Petr Červinka - FortSoft <cervinka@fortsoft.eu>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  **
- * Version 1.0.0.2
+ * Version 1.3.1.0
  */
 
 using FortSoft.Tools;
@@ -35,10 +35,10 @@ namespace LaunchAsRegistry {
     /// This is an implementation of using the PersistentSettings class for
     /// LaunchAsRegistry.
     /// </summary>
-    public class Settings : IDisposable {
+    public sealed class Settings : IDisposable {
 
         /// <summary>
-        /// Fields
+        /// Field.
         /// </summary>
         private PersistentSettings persistentSettings;
 
@@ -57,6 +57,38 @@ namespace LaunchAsRegistry {
         }
 
         /// <summary>
+        /// Represents the setting if the application should check for updates.
+        /// The default value is true.
+        /// </summary>
+        public bool CheckForUpdates { get; set; } = true;
+
+        /// <summary>
+        /// Represents whether visual styles will be used when rendering
+        /// application windows. The default value is false.
+        /// </summary>
+        public bool DisableThemes { get; set; }
+
+        /// <summary>
+        /// An example of software application setting that will be stored in the
+        /// Windows registry.
+        /// </summary>
+        public bool OneInstance { get; set; }
+
+        /// <summary>
+        /// Represents the printing setting, whether to use soft margins (larger)
+        /// or hard margins (smaller). This setting does not apply to the
+        /// embedded Chromium browser. The default value is true.
+        /// </summary>
+        public bool PrintSoftMargins { get; set; } = true;
+
+        /// <summary>
+        /// Represents the setting if the application should inform the user
+        /// about available updates in the status bar only. If not, a pop-up
+        /// window will appear. The default value is false.
+        /// </summary>
+        public bool StatusBarNotifOnly { get; set; }
+
+        /// <summary>
         /// An example of software application setting that will be stored in the
         /// Windows registry.
         /// </summary>
@@ -67,12 +99,6 @@ namespace LaunchAsRegistry {
         /// Windows registry.
         /// </summary>
         public string Arguments { get; set; }
-
-        /// <summary>
-        /// An example of software application setting that will be stored in the
-        /// Windows registry.
-        /// </summary>
-        public string WorkingFolderPath { get; set; }
 
         /// <summary>
         /// An example of software application setting that will be stored in the
@@ -90,13 +116,7 @@ namespace LaunchAsRegistry {
         /// An example of software application setting that will be stored in the
         /// Windows registry.
         /// </summary>
-        public bool OneInstance { get; set; }
-
-        /// <summary>
-        /// An example of software application setting that will be stored in the
-        /// Windows registry.
-        /// </summary>
-        public bool DisableThemes { get; set; }
+        public string WorkingFolderPath { get; set; }
 
         /// <summary>
         /// Loads the software application settings from the Windows registry.
@@ -130,17 +150,25 @@ namespace LaunchAsRegistry {
             BitArray bitArray = new BitArray(new int[] { i });
             bool[] bitSettings = new bool[bitArray.Count];
             bitArray.CopyTo(bitSettings, 0);
-            OneInstance = bitSettings[1];
-            DisableThemes = bitSettings[0];
+            i = bitSettings.Length - 27;
+
+            OneInstance = bitSettings[--i];
+            DisableThemes = bitSettings[--i];
+            PrintSoftMargins = bitSettings[--i];
+            StatusBarNotifOnly = bitSettings[--i];
+            CheckForUpdates = bitSettings[--i];
         }
 
         /// <summary>
         /// Compacts some boolean settings into an integer value.
         /// </summary>
         private int BitSettingsToInt() {
-            StringBuilder stringBuilder = new StringBuilder(string.Empty.PadRight(30, Constants.Zero));
-            stringBuilder.Append(OneInstance ? 1 : 0);
-            stringBuilder.Append(DisableThemes ? 1 : 0);
+            StringBuilder stringBuilder = new StringBuilder(string.Empty.PadRight(27, Constants.Zero))
+                .Append(OneInstance ? 1 : 0)
+                .Append(DisableThemes ? 1 : 0)
+                .Append(PrintSoftMargins ? 1 : 0)
+                .Append(StatusBarNotifOnly ? 1 : 0)
+                .Append(CheckForUpdates ? 1 : 0);
             return Convert.ToInt32(stringBuilder.ToString(), 2);
         }
 
@@ -152,15 +180,9 @@ namespace LaunchAsRegistry {
         /// <summary>
         /// Clears the software application values from the Windows registry.
         /// </summary>
-        public void Clear() {
-            persistentSettings.Clear();
-        }
+        public void Clear() => persistentSettings.Clear();
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        public void Dispose() {
-            persistentSettings.Dispose();
-        }
+        /// <summary>Clean up any resources being used.</summary>
+        public void Dispose() => persistentSettings.Dispose();
     }
 }

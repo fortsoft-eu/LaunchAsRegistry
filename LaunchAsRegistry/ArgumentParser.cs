@@ -1,49 +1,71 @@
-﻿using System;
+﻿/**
+ * This is open-source software licensed under the terms of the MIT License.
+ *
+ * Copyright (c) 2020-2023 Petr Červinka - FortSoft <cervinka@fortsoft.eu>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ **
+ * Version 1.3.1.0
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace LaunchAsRegistry {
-    public class ArgumentParser {
-        private bool expectingFilePath, expectingArguments, expectingFolderPath, expectingRegFilePath, filePathSet;
-        private bool argumentsSet, folderPathSet, regFilePathSet, helpSet, hasArguments, oneInstanceSet, thisTestSet;
+    internal class ArgumentParser {
+        private bool argumentsSet;
+        private bool expectingArguments;
+        private bool expectingFilePath;
+        private bool expectingFolderPath;
+        private bool expectingRegFilePath;
+        private bool filePathSet;
+        private bool folderPathSet;
+        private bool hasArguments;
+        private bool helpSet;
+        private bool oneInstanceSet;
+        private bool regFilePathSet;
+        private bool thisTestSet;
         private List<string> arguments;
-        private string argumentString, applicationFilePath, applicationArguments, workingFolderPath, regFilePath;
+        private string applicationArguments;
+        private string applicationFilePath;
+        private string argumentString;
+        private string regFilePath;
+        private string workingFolderPath;
 
-        public ArgumentParser() {
+        internal ArgumentParser() {
             Reset();
         }
 
-        public bool HasArguments => hasArguments;
+        internal bool HasArguments => hasArguments;
 
-        public bool IsHelp => helpSet;
+        internal bool IsHelp => helpSet;
 
-        public bool IsThisTest => thisTestSet;
+        internal bool IsThisTest => thisTestSet;
 
-        public bool OneInstance => oneInstanceSet;
+        internal bool OneInstance => oneInstanceSet;
 
-        public string ApplicationArguments => applicationArguments;
+        internal string ApplicationArguments => applicationArguments;
 
-        public string ApplicationFilePath => applicationFilePath;
+        internal string ApplicationFilePath => applicationFilePath;
 
-        public string[] Arguments {
-            get {
-                return arguments.ToArray();
-            }
-            set {
-                Reset();
-                arguments = new List<string>(value.Length);
-                arguments.AddRange(value);
-                try {
-                    Evaluate();
-                } catch (Exception exception) {
-                    Reset();
-                    throw exception;
-                }
-            }
-        }
-
-        public string ArgumentString {
+        internal string ArgumentString {
             get {
                 if (string.IsNullOrEmpty(argumentString) && arguments.Count > 0) {
                     return string.Join(Constants.Space.ToString(), arguments);
@@ -63,15 +85,34 @@ namespace LaunchAsRegistry {
             }
         }
 
-        public string RegFilePath => regFilePath;
+        internal string RegFilePath => regFilePath;
 
-        public string WorkingFolderPath => workingFolderPath;
+        internal string WorkingFolderPath => workingFolderPath;
+
+        internal string[] Arguments {
+            get {
+                return arguments.ToArray();
+            }
+            set {
+                Reset();
+                arguments = new List<string>(value.Length);
+                arguments.AddRange(value);
+                try {
+                    Evaluate();
+                } catch (Exception exception) {
+                    Reset();
+                    throw exception;
+                }
+            }
+        }
 
         private void Evaluate() {
             foreach (string arg in arguments) {
                 string argument = arg;
                 hasArguments = true;
-                if (argument == "-i" || argument == "/i") {             //Input file path: Application to launch.
+
+                // Input file path: Application to launch.
+                if (argument.Equals(Constants.CommandLineSwitchUI) || argument.Equals(Constants.CommandLineSwitchWI)) {
                     if (filePathSet || expectingFilePath) {
                         throw new ApplicationException(Properties.Resources.ExceptionMessageI);
                     }
@@ -79,7 +120,9 @@ namespace LaunchAsRegistry {
                         throw new ApplicationException(Properties.Resources.ExceptionMessageM);
                     }
                     expectingFilePath = true;
-                } else if (argument == "-a" || argument == "/a") {      //Arguments passed to the launched application.
+
+                    // Arguments passed to the launched application.
+                } else if (argument.Equals(Constants.CommandLineSwitchUA) || argument.Equals(Constants.CommandLineSwitchWA)) {
                     if (argumentsSet || expectingArguments) {
                         throw new ApplicationException(Properties.Resources.ExceptionMessageA);
                     }
@@ -87,7 +130,9 @@ namespace LaunchAsRegistry {
                         throw new ApplicationException(Properties.Resources.ExceptionMessageM);
                     }
                     expectingArguments = true;
-                } else if (argument == "-w" || argument == "/w") {      //Working folder path.
+
+                    // Working folder path.
+                } else if (argument.Equals(Constants.CommandLineSwitchUW) || argument.Equals(Constants.CommandLineSwitchWW)) {
                     if (folderPathSet || expectingFolderPath) {
                         throw new ApplicationException(Properties.Resources.ExceptionMessageW);
                     }
@@ -95,7 +140,9 @@ namespace LaunchAsRegistry {
                         throw new ApplicationException(Properties.Resources.ExceptionMessageM);
                     }
                     expectingFolderPath = true;
-                } else if (argument == "-r" || argument == "/r") {      //Registry file path.
+
+                    // Registry file path.
+                } else if (argument.Equals(Constants.CommandLineSwitchUR) || argument.Equals(Constants.CommandLineSwitchWR)) {
                     if (regFilePathSet || expectingRegFilePath) {
                         throw new ApplicationException(Properties.Resources.ExceptionMessageR);
                     }
@@ -103,18 +150,32 @@ namespace LaunchAsRegistry {
                         throw new ApplicationException(Properties.Resources.ExceptionMessageM);
                     }
                     expectingRegFilePath = true;
-                } else if (argument == "-o" || argument == "/o") {      //Allows only one instance.
-                    if (oneInstanceSet || helpSet || thisTestSet || expectingFilePath || expectingArguments || expectingFolderPath || expectingRegFilePath) {
+
+                    // Allows only one instance.
+                } else if (argument.Equals(Constants.CommandLineSwitchUO) || argument.Equals(Constants.CommandLineSwitchWO)) {
+                    if (oneInstanceSet || helpSet || thisTestSet || expectingFilePath || expectingArguments || expectingFolderPath
+                            || expectingRegFilePath) {
+
                         throw new ApplicationException(Properties.Resources.ExceptionMessageM);
                     }
                     oneInstanceSet = true;
-                } else if (argument == "-h" || argument == "/h" || argument == "-?" || argument == "/?") {      //Will show help.
-                    if (filePathSet || argumentsSet || folderPathSet || oneInstanceSet || helpSet || thisTestSet || expectingFilePath || expectingArguments || expectingRegFilePath || expectingFolderPath) {
+
+                    // Will show help.
+                } else if (argument.Equals(Constants.CommandLineSwitchUH) || argument.Equals(Constants.CommandLineSwitchWH)
+                        || argument.Equals(Constants.CommandLineSwitchUQ) || argument.Equals(Constants.CommandLineSwitchWQ)) {
+
+                    if (filePathSet || argumentsSet || folderPathSet || oneInstanceSet || helpSet || thisTestSet || expectingFilePath
+                            || expectingArguments || expectingRegFilePath || expectingFolderPath) {
+
                         throw new ApplicationException(Properties.Resources.ExceptionMessageM);
                     }
                     helpSet = true;
-                } else if (argument == "-T" || argument == "/T") {      //Test mode (ArgumentParser test).
-                    if (filePathSet || argumentsSet || folderPathSet || oneInstanceSet || helpSet || thisTestSet || expectingFilePath || expectingArguments || expectingRegFilePath || expectingFolderPath) {
+
+                    // Test mode (ArgumentParser test).
+                } else if (argument.Equals(Constants.CommandLineSwitchUU) || argument.Equals(Constants.CommandLineSwitchWU)) {
+                    if (filePathSet || argumentsSet || folderPathSet || oneInstanceSet || helpSet || thisTestSet || expectingFilePath
+                            || expectingArguments || expectingRegFilePath || expectingFolderPath) {
+
                         throw new ApplicationException(Properties.Resources.ExceptionMessageM);
                     }
                     thisTestSet = true;
@@ -146,39 +207,35 @@ namespace LaunchAsRegistry {
         }
 
         private void Reset() {
-            applicationFilePath = string.Empty;
             applicationArguments = string.Empty;
-            workingFolderPath = string.Empty;
-            regFilePath = string.Empty;
-            expectingFilePath = false;
+            applicationFilePath = string.Empty;
+            argumentsSet = false;
             expectingArguments = false;
+            expectingFilePath = false;
             expectingFolderPath = false;
             expectingRegFilePath = false;
             filePathSet = false;
-            argumentsSet = false;
             folderPathSet = false;
-            regFilePathSet = false;
-            helpSet = false;
             hasArguments = false;
+            helpSet = false;
             oneInstanceSet = false;
+            regFilePath = string.Empty;
+            regFilePathSet = false;
             thisTestSet = false;
-        }
-
-        public static string EscapeArgument(string argument) {
-            argument = Regex.Replace(argument, @"(\\*)" + "\"", @"$1$1\" + "\"");
-            return "\"" + Regex.Replace(argument, @"(\\+)$", @"$1$1") + "\"";
+            workingFolderPath = string.Empty;
         }
 
         private static List<string> Parse(string str) {
+            char[] c = str.ToCharArray();
             List<string> arguments = new List<string>();
             StringBuilder stringBuilder = new StringBuilder();
             bool e = false, d = false, s = false;
-            for (int i = 0; i < str.Length; i++) {
+            for (int i = 0; i < c.Length; i++) {
                 if (!s) {
-                    if (str[i] == Constants.Space) {
+                    if (c[i].Equals(Constants.Space)) {
                         continue;
                     }
-                    d = str[i] == Constants.QuotationMark;
+                    d = c[i].Equals(Constants.QuotationMark);
                     s = true;
                     e = false;
                     if (d) {
@@ -186,29 +243,29 @@ namespace LaunchAsRegistry {
                     }
                 }
                 if (d) {
-                    if (str[i] == Constants.BackSlash) {
-                        if (i + 1 < str.Length && str[i + 1] == Constants.QuotationMark) {
-                            stringBuilder.Append(str[++i]);
+                    if (c[i].Equals(Constants.BackSlash)) {
+                        if (i + 1 < c.Length && c[i + 1].Equals(Constants.QuotationMark)) {
+                            stringBuilder.Append(c[++i]);
                         } else {
-                            stringBuilder.Append(str[i]);
+                            stringBuilder.Append(c[i]);
                         }
-                    } else if (str[i] == Constants.QuotationMark) {
-                        if (i + 1 < str.Length && str[i + 1] == Constants.QuotationMark) {
-                            stringBuilder.Append(str[++i]);
+                    } else if (c[i].Equals(Constants.QuotationMark)) {
+                        if (i + 1 < c.Length && c[i + 1].Equals(Constants.QuotationMark)) {
+                            stringBuilder.Append(c[++i]);
                         } else {
                             d = false;
                             e = true;
                         }
                     } else {
-                        stringBuilder.Append(str[i]);
+                        stringBuilder.Append(c[i]);
                     }
                 } else if (s) {
-                    if (str[i] == Constants.Space) {
+                    if (c[i].Equals(Constants.Space)) {
                         s = false;
                         arguments.Add(e ? stringBuilder.ToString() : stringBuilder.ToString().TrimEnd(Constants.Space));
                         stringBuilder = new StringBuilder();
                     } else if (!e) {
-                        stringBuilder.Append(str[i]);
+                        stringBuilder.Append(c[i]);
                     }
                 }
             }
